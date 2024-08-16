@@ -154,6 +154,9 @@ val apiProxy = ApiProxyBuilder.endpoint("https://example.org/api/oneroster")
 val proxyUrl = apiProxy.localUrl()
  
 //.. Send API requests to/from the proxyUrl    
-    
-
 ```
+
+If an app is installed with a verified applink that includes the API endpoint and the app supports 
+[HTTP/IPC](https://github.com/UstadMobile/HTTP-IPC-Spec), then data can be sent to the learning 
+management system without requiring any connectivity.
+
