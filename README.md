@@ -123,3 +123,37 @@ On Android: you can use a built-in activity that will run the import if desired 
 
 ## Smart API Proxy
 
+The Smart API Proxy runs a smart offline-first proxy that can connect to supported EdTech APIs (e.g. OneRoster, 
+Assignment and Gradebook Service, and the Experience API). A simple HTTP cache isn't enough to handle use cases such as:
+
+* __Querying user data subsets__: an app might preload all relevant student results, and then use an API query to search 
+those results. This will be a different API URL, so even though all student results for the query may have been loaded, 
+a standard HTTP cache would fail because the API URL is different.
+* __Saving data when offline and synchronizing__: when a user completes an activity, the data needs to be saved. If offline,
+this data needs to be saved and sent to the server as soon as a connection is available (even if the app is closed in 
+meantime). If user data is queried in the meantime, this data should be included in the results.
+
+The Smart API Proxy supports:
+
+* Intelligently preloading user data such that it will be available later offline
+* Querying user data offline e.g. if all student results are loaded, it can query and return a subset of results offline
+as per the API specifications
+* Caching data loaded via any query run online for later user offline
+* Querying the server for new data automatically when a connection is available
+* Periodic polling for new data
+* Saving data when offline and submitting to the server as soon as a connection is available
+
+```
+val apiProxy = ApiProxyBuilder.endpoint("https://example.org/api/oneroster")
+    .authorization("token")
+    .protocols(ApiProxy.Protocol.ONE_ROSTER)
+    .sessionId("session-id")
+    .build()
+
+//Get a localhost server that will operate as a proxy 
+val proxyUrl = apiProxy.localUrl()
+ 
+//.. Send API requests to/from the proxyUrl    
+    
+
+```
