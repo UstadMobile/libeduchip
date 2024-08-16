@@ -11,7 +11,7 @@ LibEduCHIP makes it easy to make easy-to-use, resilient edtech apps that:
 ## Distributed Edge HTTP Cache
 
 The distributed Edge HTTP Cache handles all cases a normal HTTP cache handles and adds support for:
-* Downloading an HTTP request from nearby devices instead of via the Internet to reduce bandwidth usage
+* Downloading http requests from nearby devices instead of via the Internet to reduce bandwidth usage
 * Downloading and retaining a list of HTTP URLs such that they can be accessed offline later (e.g. when a user selects
 a given lesson for offline use)
 * Importing/exporting a set of HTTP requests/responses to/from a file so that they can be pre-loaded (e.g. via USB stick)
