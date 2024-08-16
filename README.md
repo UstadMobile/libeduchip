@@ -1,58 +1,122 @@
-[![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+# LibEduCHIP
 
-# Multiplatform library template
+LibEduCHIP makes it easy to make easy-to-use, resilient edtech apps that:
 
-## What is it?
+* Support single sign-on and rostering
+* Use far less data: up to 95% less when a group of users (e.g. students) are accessing
+  the same content nearby
+* Store/retrieve learner progress data to/from a Learning Management System, online or offline, 
+  and syncs when a connection is available.
 
-It is the barebones library project intended to quickly bootstrap a Kotlin Multiplatform library, that is deployable to Maven Central.
+## Distributed Edge HTTP Cache
 
-It has only one function: generate the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence) starting from platform-provided numbers. Also, it has a test for each platform just to be sure that tests run.
+Use cases:
+* Downloading an HTTP request from nearby devices instead of via the Internet to reduce bandwidth usage
+* Downloading and retaining a list of HTTP URLs such that they can be accessed offline later
+* Importing/exporting a set of HTTP requests/responses to/from a file so that they can be pre-loaded (e.g. via USB stick)
 
-Note that no other actions or tools usually required for the library development are set up, such as [tracking of backwards compatibility]
-(https://kotlinlang.org/docs/jvm-api-guidelines-backward-compatibility.html#tools-designed-to-enforce-backward-compatibility), explicit API mode,
-licensing, contribution guideline, code of conduct and others.
+### Get started
 
-## How do I build it?
+Create an instance of DistributedEdgeCache, then add the interceptor to your OKHttp builder:
 
-1. - [x] Clone this repository ot just [use it as template](https://github.com/Kotlin/multiplatform-library-template/generate)
-1. - [ ] Edit library module name and include it in [`settings.gradle.kts`](settings.gradle.kts#L18)
-1. - [ ] Edit [`groupId` and `version`](convention-plugins/src/main/kotlin/module.publication.gradle.kts#L10-L11)
-    1. If you need the Android support update namespace [there](library/build.gradle.kts#L38) too
-    1. If you don't need an Android support delete the [`android` section](library/build.gradle.kts#L37-L43)
-1. - [ ] Edit [build targets you need](library/build.gradle.kts#L9-L21)
+```
+val dCache = DistributedEdgeCacheBuilder(context).build()
+val okHttpClient = OKHttpClient.Builder()
+    .addInterceptor(DistributedEdgeCacheInterceptor(dCache))
+    .build()
+```
 
-At this stage, you have everything set to work with Kotlin Multiplatform. The project should be buildable (but you might need to provide actual starting values for the platforms you need).
+When a request is made for a URL which is available on a nearby device, it will be automatically
+be downloaded from the nearby device instead of from the Internet if it meets the Redistributable 
+HTTP criteria below.
 
-## How do I make it build on GitHub Actions?
+Devices discover each other using [DNS-SD](http://www.dns-sd.org/) (the same protocol used to discover
+network printers etc) and Google Nearby (where enabled). Devices proactively exchange hashes of all
+the URLs they have available, so when a client makes a request there is no additional latency.
 
-To make it work on GitHub actions, you need to update the [`matrix` section in `gradle.yml`](.github/workflows/gradle.yml#L25-L34). If you didn't change platforms in `build.gradle.kts` you don't need to touch anything. But still read it to understand how it works.
+### Redistributable HTTP criteria
 
-Also, currently, it only runs tests, but you can change this behaviour as you wish by modifying `matrix` and the Gradle [build command](.github/workflows/gradle.yml#L52)
+Distributed Edge Caching enables devices to download files from other nearby devices (peers)
+running the same app (as would be common when a class of students use an app) instead of
+downloading the files repeatedly the Internet (wasting bandwidth). Network operators (e.g.
+mobile network operators, ISPs, etc) may independently operate a proxy cache for their users,
+which an app can opt in to using.
 
-## How do I deploy it to Maven Central?
+An HTTP request may be fulfilled redistributed where:
 
-The most part of the job is already automated for you. However, deployment to Maven Central requires some manual work from your side. 
+* The request uses HTTP GET 
+* The response includes the ```cache-control: public``` header (avoids accidentally sharing 
+responses that contain personal/sensitive information).
+* The response does not vary based on request headers (e.g. it must not vary based on client user-agent etc).
+* (Recommended) a checksum is provided to allow clients to verify integrity. This can be done by:
+  * Add a request header directly specifying the expected [subresource integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity):
+  e.g.  
+  ```decache-check-integrity: sha256-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC```
+  * Generating the checksum on the command line and then passing a url in the header 
+  ```decache-check-integrity: https://example.org/file.zip.sha256sum```
+  * The server adding a [Content-Digest](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Digest) header.
 
-1. - [ ] Create an account at [Sonatype issue tracker](https://issues.sonatype.org/secure/Signup!default.jspa)
-1. - [ ] [Create an issue](https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134) to create new project for you
-1. - [ ] You will have to prove that you own your desired namespace
-1. - [ ] Create a GPG key with `gpg --gen-key`, use the same email address you used to sign up to the Sonatype Jira
-1. - [ ] Find your key id in the output of the previous command looking like `D89FAAEB4CECAFD199A2F5E612C6F735F7A9A519`
-1. - [ ] Upload your key to a keyserver, for example 
-    ```bash
-    gpg --send-keys --keyserver keyserver.ubuntu.com "<your key id>"
-    ```
-1. - [ ] Now you should create secrets available to your GitHub Actions
-    1. via `gh` command
-    ```bash
-    gh secret set OSSRH_GPG_SECRET_KEY -a actions --body "$(gpg --export-secret-key --armor "<your key id>")"
-    gh secret set OSSRH_GPG_SECRET_KEY_ID -a actions --body "<your key id>"
-    gh secret set OSSRH_GPG_SECRET_KEY_PASSWORD -a actions --body "<your key password>"
-    gh secret set OSSRH_PASSWORD -a actions --body "<your sonatype account password>"
-    gh secret set OSSRH_USERNAME -a actions --body "<your sonatype account username>"
-    ```
-    1. Or via the interface in `Settings` → `Secrets and Variables` → `Actions`, same variables as in 1.
-1. - [ ] Edit deployment pom parameters in [`module.publication.gradle.kts`](convention-plugins/src/main/kotlin/module.publication.gradle.kts#L25-L44)
-1. - [ ] Edit deploy targets in [`deploy.yml`](.github/workflows/deploy.yml#L23-L36)
-1. - [ ] Call deployment manually when ready [in Actions](../../actions/workflows/deploy.yml) → `Run Workflow`
-1. - [ ] When you see in your account on https://oss.sonatype.org that everything is fine, you can release your staging repositories and add target `releaseSonatypeStagingRepository` to `deploy.yml` [after this line](.github/workflows/deploy.yml#L60). This way artifacts will be published to central automatically when tests pass.
+Any HTTP request that does not meet the criteria for distributed caching will still be cached 
+on disk according to the normal HTTP cache rules.
+
+
+### Download and retain a set of URLs for use offline
+
+If a user selects a particular piece of content for offline use, then it is likely that you want to retain a given list
+of URLs in the cache until the user explicitly unselects the content for offline use. 
+
+DistributedEdgeCache makes this easy. Once the download has been completed, http requests for the given URLs will 
+succeed as 'normal', even if the device is offline.
+
+```
+val jobId = distributedEdgeCache.downloadAndRetain(
+    listOf(
+        EntryLockRequest("https://example.org/lesson-1.mp3", remark = "lesson001"),
+        EntryLockRequest("https://example.org/lesson-1.html", remark = "lesson001"),
+        ...
+    ),
+)    
+```
+
+If/when the user no longer wants to retain the files:
+```
+distributedEdgeCache.release(jobId)
+```
+
+### Import/Export a collection of URLs to/from a file
+
+If an organization (e.g. school) with limited connectivity wants to setup many devices quickly, it may be desirable
+to load data to/from a file (e.g. a USB drive, SD-Card, etc).
+
+Export to a [WARC](https://en.wikipedia.org/wiki/WARC_(file_format)) file can be done using external tools (e.g. 
+[heritix](https://github.com/internetarchive/heritrix3)) or using DistributedEdgeCache itself:
+```
+val jobId = distributedEdgeCache.downloadAndExport(
+    urls = listOf("https://example.org/lesson-1.mp3", "https://example.org/lesson-1.html"),
+    file = "path/to/lesson1.warc",
+)
+```
+
+Then import:
+```
+val jobId = distributedEdgeCache.importAndRetain("path/to/lesson1.warc")
+```
+
+On Android: you can use a built-in activity that will run the import if desired by adding an intent-filter:
+
+```
+<activity android:name="org.educhip.dec.ImportWarc">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="file" />
+        <data android:mimeType="*/*" />
+        <data android:pathPattern=".*\\.warc.myappname" />
+        <data android:host="*" />
+    </intent-filter>
+</activity>
+```
+
+## Smart API Proxy
+
