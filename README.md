@@ -48,7 +48,7 @@ which an app can opt in to using.
 An HTTP request may be fulfilled redistributed where:
 
 * The request uses HTTP GET 
-* The response includes the ```cache-control: public``` header (avoids accidentally sharing 
+* The response includes the ```cache-control: public``` header (to avoid accidentally sharing 
 responses that contain personal/sensitive information).
 * The response does not vary based on request headers (e.g. it must not vary based on client user-agent etc).
 * (Recommended) a checksum is provided to allow clients to verify integrity. This can be done by:
@@ -121,28 +121,59 @@ On Android: you can use a built-in activity that will run the import if desired 
 </activity>
 ```
 
-## Smart API Proxy
+## Smart Edtech API Proxy
 
-The Smart API Proxy runs a smart offline-first proxy that can connect to supported EdTech APIs (e.g. OneRoster, 
-Assignment and Gradebook Service, and the Experience API). A simple HTTP cache isn't enough to handle use cases such as:
+Edtech apps often communicate with a Learning Management System (LMS) or Student Information System (SIS) to 
+retrieve or store learner data to handle use cases such as:
 
-* __Querying user data subsets__: an app might preload all relevant student results, and then use an API query to search 
-those results. This will be a different API URL, so even though all student results for the query may have been loaded, 
-a standard HTTP cache would fail because the API URL is different.
-* __Saving data when offline and synchronizing__: when a user completes an activity, the data needs to be saved. If offline,
-this data needs to be saved and sent to the server as soon as a connection is available (even if the app is closed in 
-meantime). If user data is queried in the meantime, this data should be included in the results.
+* Retrieve rostering information e.g. class enrolments, role (student, teacher, or parent), grade level, etc.
+* Storing learner responses and grades as they progress
+* Storing and retrieving state data to enable the user to resume their session from where they left off, even on a 
+different device
 
-The Smart API Proxy supports:
+Edtech apps should not require teachers and students to have a separate account for each app. Users often use several
+different apps for different subjects or purposes. Creating new accounts for each app for each member of the class 
+creates a poor experience where time is wasted managing multiple accounts and it is far more difficult for teachers to 
+track student progress across multiple apps. 
 
-* Intelligently preloading user data such that it will be available later offline
-* Querying user data offline e.g. if all student results are loaded, it can query and return a subset of results offline
-as per the API specifications
-* Caching data loaded via any query run online for later user offline
-* Querying the server for new data automatically when a connection is available
-* Periodic polling for new data
-* Saving data when offline and submitting to the server as soon as a connection is available
+Simple single sign-on (e.g. sign-in with Google, Facebook, etc) is 
+insufficient because it does not include the required context (user role e.g. teacher, student, etc) or the ability to 
+store/retrieve learner progress and results.
 
+Identity and profile management in an education context is often handled using proprietary services (e.g. [Clever](https://www.clever.com/)) 
+or can be done using using open standards over HTTP REST services such as [OneRoster](https://www.1edtech.org/standards/oneroster), 
+the [Assignment and Grade Service](https://www.imsglobal.org/spec/lti-ags/v2p0/), and the [Experience API](https://www.xapi.com/). 
+
+This becomes much more complicated if the network is intermittent or unreliable: apps often need 
+progress information to determine what a learner should do next. If connectivity is interrupted when a lesson is 
+completed then the result needs to be saved locally, shown to the user, and then submitted to the HTTP API as soon as a
+connection is available. If the submission is rejected by the server, the local state needs updated accordingly.
+
+### Handling imperfect connectivity
+
+An [offline-first app](https://developer.android.com/topic/architecture/data-layer/offline-first) is able to perform key 
+functionality without access to the Internet. In the case of an edtech app as above this should include:
+
+* Preloading the learner profile information required for a student or teacher session to continue if the user goes 
+offline later
+* Saving learner progress information when the user is offline and submitting this to the HTTP API when a network 
+connection is available.
+* Resolving conflicts between the local state and the state on the server e.g. if the server rejects a result that was
+recorded offline.
+
+The Smart Edtech API Proxy makes this much easier by supporting:
+
+* **Offline access to data**: Any data retrieved through the proxy when the 
+user is online will be stored in a local database. If the user later goes offline, the proxy can serve the request using
+the local database. This works even if the query is different (e.g. the app might preload all state data relevant to a 
+given user session and later on query a specific subset of the data).
+* **Storing/updating data offline** Any data to save or update is saved in the local database and queued for submission 
+to the server as soon as a connection is available. The request is retried as required, and the proxy integrates with 
+the operating system's background requests to ensure the data is submitted to the server even if the edtech app itself 
+was closed in the meantime.
+* **Handling conflicts** If an update is rejected by the server when submitted, then the local database must be updated.
+
+The proxy will be used as follows:
 ```
 val apiProxy = ApiProxyBuilder.endpoint("https://example.org/api/oneroster")
     .authorization("token")
