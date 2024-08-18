@@ -151,8 +151,8 @@ connection is available. If the submission is rejected by the server, the local 
 
 ### Handling imperfect connectivity
 
-An [offline-first app](https://developer.android.com/topic/architecture/data-layer/offline-first) is able to perform key 
-functionality without access to the Internet. In the case of an edtech app as above this should include:
+An is able to perform key functionality without access to the Internet. In the case of an edtech app as above this 
+should include:
 
 * Preloading the learner profile information required for a student or teacher session to continue if the user goes 
 offline later
