@@ -144,7 +144,7 @@ Identity and profile management in an education context is often handled using p
 or can be done using using open standards over HTTP REST services such as [OneRoster](https://www.1edtech.org/standards/oneroster), 
 the [Assignment and Grade Service](https://www.imsglobal.org/spec/lti-ags/v2p0/), and the [Experience API](https://www.xapi.com/). 
 
-This becomes much more complicated if the network is intermittent or unreliable: apps often need 
+Using open standard HTTP REST APIs becomes much more complicated if Internet access is intermittent or unreliable: apps often need 
 progress information to determine what a learner should do next. If connectivity is interrupted when a lesson is 
 completed then the result needs to be saved locally, shown to the user, and then submitted to the HTTP API as soon as a
 connection is available. If the submission is rejected by the server, the local state needs updated accordingly.
