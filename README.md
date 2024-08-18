@@ -151,7 +151,7 @@ connection is available. If the submission is rejected by the server, the local 
 
 ### Handling imperfect connectivity
 
-An is able to perform key functionality without access to the Internet. In the case of an edtech app as above this 
+An **offline-first** app is able to perform key functionality without access to the Internet. In the case of an edtech app as above this 
 should include:
 
 * Preloading the learner profile information required for a student or teacher session to continue if the user goes 
