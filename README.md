@@ -1,12 +1,28 @@
 # LibEduCHIP
 
-LibEduCHIP makes it easy to make easy-to-use, resilient edtech apps that:
+LibEduCHIP makes it easy to develop easy-to-use, resilient edtech apps that:
 
 * Support single sign-on and rostering
 * Use far less data: up to 95% less when a group of users (e.g. students) are accessing
   the same content nearby
 * Store/retrieve learner progress data to/from a Learning Management System, online or offline, 
   and syncs when a connection is available.
+
+## Scenario
+Imagine that you're a teacher in a rural school in the low-income world. At your school, the Internet is either not available at all, or unreliable, or unaffordable. You can't afford even a Linux server, nor is knowledgeable staff available to operate one. Solar panels, StarLink, and a "proper" Internet connection are out of the question, because your total per-student budget is perhaps $5 per year. What you have are few cheap, old smartphones, at least some of the time, for some of the students. libEduCHIP is designed to use these real-world resources as efficiently as possible. libEduCHIP accomplishes this objective through the implementation of three weel-known, proven technologies that have never before been combined on smartphones for this purpose:
+* An HTTP web proxy
+* Mesh networking
+* Context-aware, distributed caching
+* Using smartphone-compatible Micro SD Cards as pre-loaded courseware caches
+
+## Benefits
+By implementing support for libEduCHIP in your courseware app, you:
+* Make your app useful to students, teachers, and schools beyond the reach of fast, cheap, reliable Internet;
+* Enable intermittent synchronization whenever one of the school's phones happens to connect to the Internet;
+* Reduce the cost of the school's Internet data charges by up to 95%;
+* Etc.
+
+Here's how you can add support for libEduCHIP to your courseware app.
 
 ## Distributed Edge HTTP Cache
 
