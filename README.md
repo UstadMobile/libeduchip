@@ -8,6 +8,24 @@ LibRESPECT makes it easy to make easy-to-use, resilient edtech apps that:
 * Store/retrieve learner progress data to/from a Learning Management System, online or offline, 
   and syncs when a connection is available.
 
+## Scenario
+
+Low and Middle Income Country markets have the fastest growth rates, however there are also some challenges as outlined in the [Build for Billions](https://developer.android.com/docs/quality-guidelines/build-for-billions) guidelines:
+
+- **Connectivity**: most users have limited Internet access via a capped mobile data bundle. Average mobile data usage per subscriber per month is [82% lower in Sub-Saharan Africa (5GB) than in India (29GB)](https://www.ericsson.com/en/reports-and-papers/mobility-report/dataforecasts/mobile-traffic-forecast), Most users are not entirely offline, but also do not have access to always-on high-speed practically unlimited connectivity. The connection may unreliable or slow, especially in rural areas. Using more data often directly increases cost to users.
+- **Device capacity**: users are more likely to use a low-cost device which has less RAM, less storage space, and a slower processor than higher income markets. Users in lower income markets are also more likely to have an older version of Android.
+- **Fewer opportunities to regularly recharge**: users in areas without reliable grid electricity may have to pay someone with a solar panel/generator to charge their phone
+
+Optimizing performance to provide a better experience in Low and Middle Country markets also benefits users in higher income markets. When was the last time you heard someone complaining that an app started too fast and used too little disk space?
+
+These challenges are unlikely to disappear anytime soon. Mobile data usage will grow, however low and low middle income country markets will continue to use less data per subscriber as [forecasted by Ericsson](https://www.ericsson.com/en/reports-and-papers/mobility-report/dataforecasts/mobile-traffic-forecast). Starlink and other satellite based Internet solutions are still more expensive (per GB) than fiber optic cables.
+
+The education sector has very limited resources. The average low income country education budget is just $53 per child per year (including teacher salaries, books, building, ministry management, etc) as per [an April 2023 WorldBank report - pg5](https://thedocs.worldbank.org/en/doc/9b9ecb979e36e80ed50b1f110565f06b-0200022023/original/Adequacy-Paper-Final.pdf). If a country spent the same percentage (7%) of its education budget on technology as the United States, the edtech budget would be $3.71 per child per year. Reducing costs as far as possible is critical. RESPECT make this easier by:
+
+* Reducing data use: peer-to-peer distributed caching reduces data use around 95% when an activity is being used by a group of 20.
+* Making it easier for apps to function when connectivity is interrmittent or unreliable by preloading data via the network or using file storage (eg. SDCard, USB flash drive) and synchronizing progress when a connection is available.
+* Single sign-in and interoperability that simplifies the user experience (reducing training and support costs) and enables decision makers to collect data and optimize resource allocation.
+
 ## Distributed Edge HTTP Cache
 
 The Distributed Edge HTTP Cache handles all cases a normal HTTP cache handles and adds support for:
