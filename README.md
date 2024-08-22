@@ -1,6 +1,6 @@
-# LibEduCHIP
+# LibRESPECT
 
-LibEduCHIP makes it easy to make easy-to-use, resilient edtech apps that:
+LibRESPECT makes it easy to make easy-to-use, resilient edtech apps that:
 
 * Support single sign-on and rostering
 * Use far less data: up to 95% less when a group of users (e.g. students) are accessing
@@ -108,7 +108,7 @@ val jobId = distributedEdgeCache.importAndRetain("path/to/lesson1.warc")
 On Android: you can use a built-in activity that will run the import if desired by adding an intent-filter:
 
 ```
-<activity android:name="org.educhip.dec.ImportWarc">
+<activity android:name="org.respectpolicy.dec.ImportWarc">
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
