@@ -8,7 +8,7 @@ LibRESPECT makes it easy to make easy-to-use, resilient edtech apps that:
 * Store/retrieve learner progress data to/from a Learning Management System, online or offline, 
   and syncs when a connection is available.
 
-It has two primary components: a distributed edge HTTP cache and a smart edtech API proxy.
+It has two primary components: a [distributed edge HTTP cache](#distributed-edge-http-cache) and an embeddable [smart edtech API http proxy](#smart-edtech-api-proxy).
 
 ## Scenario
 
