@@ -8,6 +8,8 @@ LibRESPECT makes it easy to make easy-to-use, resilient edtech apps that:
 * Store/retrieve learner progress data to/from a Learning Management System, online or offline, 
   and syncs when a connection is available.
 
+It has two primary components: a distributed edge HTTP cache and a smart edtech API proxy.
+
 ## Scenario
 
 Low and Middle Income Country markets have the fastest growth rates, however there are also some challenges as outlined in the [Build for Billions](https://developer.android.com/docs/quality-guidelines/build-for-billions) guidelines:
@@ -140,6 +142,24 @@ On Android: you can use a built-in activity that will run the import if desired 
 ```
 
 ## Smart Edtech API Proxy
+
+The Smart Edtech API Proxy provides an HTTP proxy that can be embedded in edtech apps to make sending/receiving
+learner data to/from a Learning Management System or Student Information System easier when connectivity is limited, unreliable, or unavailable. The typical flow is as follows:
+
+* The consumer app (e.g. a math app) gets a token using [OAuth](https://oauth.net/2/) from the provider app using a normal single sign-on flow (e.g. a learning management
+  system). If the provider app is installed and linked to the domain this can be done without requiring connectivity.
+* The consumer app requests librespect-proxy to start a session using the authentication token. The librespect-proxy provides a localhost http server that
+  can receive http requests using common edtech APIs including [OneRoster](https://www.1edtech.org/standards/oneroster), [xAPI](https://xapi.com), etc.
+* The consumer app MAY request librespect-proxy to preload relevant data so it's available if the user goes offline later.
+* The consumer app can send HTTP API requests to the proxy the same as it would send them to the normal server. The proxy will handle them as follows:
+    * __Data retrieval requests__ : When a request is received and connectivity is available, the proxy will connect to the online API server to check for any updates and update its
+     local database if required. The proxy will then respond to the request (even if the device is offline) using the local database. The proxy can even return a result when offline when
+     that URL was never previously retrieved: because the proxy understands the underlying Edtech APIs, it can still run the query against its local database to provide a result. If the
+     consumer app requests to preload a set of records when the user is online, and then requests one of those records individually when the user is offline, it will still work.
+    * __Data storage requests__: When a request is received the updated data will be stored in the local database. It will then be sent to the online API server as soon as a connection is
+    available. In the meantime the locally stored data will be returned in any relevant queries. If the data is rejected by the online server the local database will be updated accordingly.
+    The data will even be sent if the user is connected after the app is closed by using the underlying platform background transfer APIs (e.g. WorkManager on Android).
+* If the provider app is installed and supports [HTTP-IPC](https://github.com/UstadMobile/HTTP-IPC-Spec) then data can be sent to the provider app without connectivity.
 
 Edtech apps often communicate with a Learning Management System (LMS) or Student Information System (SIS) to 
 retrieve or store learner data to handle use cases such as:
